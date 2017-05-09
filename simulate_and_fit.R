@@ -42,11 +42,12 @@ system.time(
 s <- mcmc(d[[1]], priors, methodPi = "stickBreaking", n_iter=500000, idx_save=c(0,499,999), thin=1,
           n_save_P=100, alpha_fixed=F, verbose = 0, warmup=10000, slice_width=1, max_steps=100, estimates=estimates)
 )
+saveRDS(s, "samples_stick.rds")
+saveRDS(d[[2]], "truth.rds")
+
 system.time(
 s2 <- mcmc(d[[1]], priors, methodPi = "symmDirichlet", n_iter=500000, idx_save=c(0,499,999), thin=1,
           n_save_P=100, alpha_fixed=F, verbose = 0, warmup=10000, slice_width=1, max_steps=100, estimates=estimates)
 )
 
-saveRDS(s, "samples_stick.rds")
 saveRDS(s2, "samples_SD.rds")
-saveRDS(d[[2]], "truth.rds")
