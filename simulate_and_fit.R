@@ -39,12 +39,12 @@ estimates <- indEstimates(d[[1]])
 priors <- formatPriors(K, prior_mean, prior_sd)
 #chain <- initChain(priors, G, estimates)
 system.time(
-s <- mcmc(d[[1]], priors, methodPi = "stickBreaking", n_iter=10000, idx_save=0, thin=5,
-          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=1000, slice_width=10, estimates=estimates)
+s <- mcmc(d[[1]], priors, methodPi = "stickBreaking", n_iter=20000, idx_save=0, thin=1,
+          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=10000, slice_width=10, estimates=estimates)
 )
 system.time(
-s2 <- mcmc(d[[1]], priors, methodPi = "symmDirichlet", n_iter=10000, idx_save=0, thin=5,
-          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=1000, slice_width=10, estimates=estimates)
+s2 <- mcmc(d[[1]], priors, methodPi = "symmDirichlet", n_iter=20000, idx_save=0, thin=1,
+          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=10000, slice_width=10, estimates=estimates)
 )
 
 saveRDS(s, "samples_stick.rds")
