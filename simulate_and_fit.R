@@ -3,6 +3,7 @@ library(cudarpackage)
 #simulate data
 sim_data <- function(G, X, group_n, mu_beta, sd_beta, corr=NULL, mu_dispersion, sd_dispersion){
   V <- length(group_n)
+  N <- sum(group_n)
   group_id <- unlist(sapply(1:V, function(g) rep(g, group_n[g])))
   X <- X[group_id,]
   if(!is.null(corr)){
@@ -11,33 +12,41 @@ sim_data <- function(G, X, group_n, mu_beta, sd_beta, corr=NULL, mu_dispersion, 
   } else{
     beta <- sapply(1:G, function(g) rnorm(V, mu_beta, sd_beta))
   }
+  dispersion <- rlnorm(G, mu_dispersion, sd_dispersion)
+  y <- t(sapply(1:G, function(g) rnbinom(N, mu = exp(X %*% beta[,g]), size = 1/dispersion[g])))
+  out <- list(formatData(y, X), truth = list(beta = beta))
+  out
 }  
-M
+
 G <- 1000
-group_n <- c(3, 3, 4)
-V <- length(group_n)
-group_id <- unlist(sapply(1:V, function(g) rep(g, group_n[g])))
-X <- matrix(c(1, -1, 0,
-              1,  1, 0,
-              1,  0, 1), V, V,
-              byrow=T)[group_id,]
+X <- diag(3)
 
-mu_beta <- c(4, 0, 0)
-sd_beta <- c(1.5, .2, .4)
-mu_disper <- function(beta) pmin(-beta[1,]^.25, 1)
-sd_disper <- 1
+m <- matrix(c(3, 1, 1,
+              1, 3, 1,
+              1, 1, 3), 3, 3)
+m
 
-beta <- sapply(1:G, function(g) rnorm(V, mu_beta, sd_beta))
-disper <- rlnorm(G, mu_disper(beta), sd_disper)
+prior_mean <- c(0,0,0)
 
-y <- matrix(rnbinom(G*sum(group_n), mu = exp(X %*% beta), size = 1/disper),
-            G, sum(group_n), byrow=T)
+cr <- cov2cor(m)
+prior_sd <- sqrt(diag(m))
+d <- sim_data(G, X, c(3,2,2), prior_mean, prior_sd, cr, -2, .5)
+d
 
-ord <- order(beta[1,])
-head(cbind(y[ord,], beta1 = beta[1,ord], beta2 = beta[2,ord], beta3 = beta[3,ord], disper = disper[ord]))
+K <- 500
 
-#fit model (no voom)
+estimates <- indEstimates(d[[1]])
+priors <- formatPriors(K, prior_mean, prior_sd)
+chain <- initChain(priors, G, estimates)
+system.time(
+s <- mcmc(d[[1]], priors, methodPi = "stickBreaking", n_iter=10000, idx_save=0, thin=5,
+          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=1000, slice_width=10, estimates=estimates)
+)
+system.time(
+s2 <- mcmc(d[[1]], priors, methodPi = "symmDirichlet", n_iter=10000, idx_save=0, thin=5,
+          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=1000, slice_width=10, estimates=estimates)
+)
 
-
-
-
+saveRDS(s, "samples_stick.rds")
+saveRDS(s2, "samples_SD.rds")
+saveRDS(d[[2]], "truth.rds")
