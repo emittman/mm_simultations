@@ -22,12 +22,12 @@ sim_data <- function(G, X, group_n, mu_beta, sd_beta, corr=NULL, mu_dispersion, 
 
 G <- 10000
 X <- matrix(c(1, -.5, 0,
-              1, .5, 0,
-              1, 0, 1), 3, 3, byrow=T)
+              1,  .5, 0,
+              1,   0, 1), 3, 3, byrow=T)
 
-m <- matrix(c(3, 1, -.5,
-              1, 2, .5,
-              -.5, .5, 1), 3, 3)
+m <- matrix(c(3,  0,  0,
+              0,  2,  0,
+              0,  0,  1), 3, 3)
 m
 
 prior_mean <- c(3,0,0)
@@ -39,9 +39,11 @@ d
 
 K <- 3000
 
+formatted_data <- d[[1]]
 estimates <- indEstimates(d[[1]])
 counts <- d[[2]]
 truth <- d[[3]]
+saveRDS(formatted_data, "formatted_data.rds")
 saveRDS(estimates, "estimates.rds")
 saveRDS(counts, "counts.rds")
 saveRDS(truth, "truth.rds")
@@ -55,14 +57,14 @@ priors <- formatPriors(K = K,
                        A=5, B=.5) #vague prior on alpha
 #chain <- initChain(priors, G, estimates)
 system.time(
-s <- mcmc(d[[1]], priors, methodPi = "stickBreaking", n_iter=100000, idx_save=c(0,499,999), thin=1,
-          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=30000, estimates=estimates)
+s <- mcmc(d[[1]], priors, methodPi = "stickBreaking", n_iter=200000, idx_save=1:10 * 1e3 - 1, thin=1,
+          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=60000, estimates=estimates)
 )
 saveRDS(s, "samples_stick.rds")
 
 system.time(
-s2 <- mcmc(d[[1]], priors, methodPi = "symmDirichlet", n_iter=100000, idx_save=c(0,499,999), thin=1,
-          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=30000, slice_width=1, max_steps=100, estimates=estimates)
+s2 <- mcmc(d[[1]], priors, methodPi = "symmDirichlet", n_iter=200000, idx_save=1:10 * 1e3 - 1, thin=1,
+          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=60000, slice_width=1, max_steps=100, estimates=estimates)
 )
 
 saveRDS(s2, "samples_SD.rds")
