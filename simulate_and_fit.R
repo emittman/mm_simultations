@@ -34,7 +34,7 @@ prior_mean <- c(3,0,0)
 
 cr <- cov2cor(m)
 prior_sd <- sqrt(diag(m))
-d <- sim_data(G, X, c(4,4,6), prior_mean, prior_sd, cr, -2, .5)
+d <- sim_data(G, X, c(4,4,4), prior_mean, prior_sd, cr, -2, .5)
 d
 
 K <- 3000
@@ -54,17 +54,17 @@ priors <- formatPriors(K = K,
                        prior_sd = prior_sd,
                        a = prior_from_est$a,
                        b = prior_from_est$b,
-                       A=5, B=.5) #vague prior on alpha
+                       A=1, B=.001) #vague prior on alpha
 #chain <- initChain(priors, G, estimates)
 system.time(
-s <- mcmc(d[[1]], priors, methodPi = "stickBreaking", n_iter=200000, idx_save=1:10 * 1e3 - 1, thin=1,
-          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=60000, estimates=estimates)
+s <- mcmc(d[[1]], priors, methodPi = "stickBreaking", n_iter=10000, idx_save=1:10 * 1e3 - 1, thin=1,
+          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=5000, estimates=estimates)
 )
 saveRDS(s, "samples_stick.rds")
 
 system.time(
-s2 <- mcmc(d[[1]], priors, methodPi = "symmDirichlet", n_iter=200000, idx_save=1:10 * 1e3 - 1, thin=1,
-          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=60000, slice_width=1, max_steps=100, estimates=estimates)
+s2 <- mcmc(d[[1]], priors, methodPi = "symmDirichlet", n_iter=10000, idx_save=1:10 * 1e3 - 1, thin=1,
+          n_save_P=100, alpha_fixed=F, verbose = 0, warmup=5000, slice_width=1, max_steps=100, estimates=estimates)
 )
 
 saveRDS(s2, "samples_SD.rds")
