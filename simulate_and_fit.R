@@ -2,6 +2,25 @@ library(cudarpackage)
 
 set.seed(134312517)
 
+#' Different settings:
+#' 1. genes = 5000, 50000
+#' 2. K = 1000, 10000
+#' 3. V = 4, 8
+
+G <- 10000
+
+#derive from V
+X <- matrix(c(1, -.5, 0,
+              1,  .5, 0,
+              1,   0, 1), 3, 3, byrow=T)
+
+m <- matrix(c(3,  0,  0,
+              0,  2,  0,
+              0,  0,  1), 3, 3)
+
+prior_mean <- c(3,0,0)
+m
+
 #simulate data
 sim_data <- function(G, X, group_n, mu_beta, sd_beta, corr=NULL, mu_dispersion, sd_dispersion){
   V <- length(group_n)
@@ -20,10 +39,6 @@ sim_data <- function(G, X, group_n, mu_beta, sd_beta, corr=NULL, mu_dispersion, 
   out
 }  
 
-G <- 10000
-X <- matrix(c(1, -.5, 0,
-              1,  .5, 0,
-              1,   0, 1), 3, 3, byrow=T)
 
 m <- matrix(c(3,  0,  0,
               0,  2,  0,
